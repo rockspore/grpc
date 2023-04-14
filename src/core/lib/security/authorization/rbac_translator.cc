@@ -32,10 +32,13 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/strip.h"
 
+#include <grpc/grpc_audit_logging.h>
+
 #include "src/core/lib/gpr/useful.h"
 #include "src/core/lib/json/json.h"
 #include "src/core/lib/json/json_reader.h"
 #include "src/core/lib/matchers/matchers.h"
+#include "src/core/lib/security/audit_logging/audit_logging.h"
 
 namespace grpc_core {
 
@@ -348,6 +351,103 @@ absl::StatusOr<Rbac> ParseAllowRulesArray(const Json& json,
   return Rbac(Rbac::Action::kAllow, std::move(policies_or.value()));
 }
 
+absl::StatusOr<std::unique_ptr<experimental::AuditLoggerFactory::Config>>
+ParseAuditLogger(const Json& json, size_t pos) {
+  if (json.type() != Json::Type::kObject) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("\"audit_loggers[%d]\" is not an object.", pos));
+  }
+  bool is_optional = false;
+  auto it = json.object().find("is_optional");
+  if (it != json.object().end()) {
+    switch (it->second.type()) {
+      case Json::Type::kTrue:
+        is_optional = true;
+        break;
+      case Json::Type::kFalse:
+        break;
+      default:
+        return absl::InvalidArgumentError(absl::StrFormat(
+            "\"audit_loggers[%d].is_optional\" is not a boolean.", pos));
+    }
+  }
+  auto result =
+      experimental::GetAuditLoggerRegistry().GetAuditLoggerFactory("");
+  if (!result.ok()) {
+    return is_optional ? absl::OkStatus()
+                       : absl::InvalidArgumentError(absl::StrFormat(
+                             "\"audit_loggers[%d]\" is unsupported.", pos));
+  }
+  Json config;
+  it = json.object().find("config");
+  if (it != json.object().end()) {
+    if (it->second.type() != Json::Type::kObject) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "\"audit_loggers[%d].config\" is not an object.", pos));
+    }
+    config = it->second;
+  }
+  auto audit_logger_or = result.value()->ParseAuditLoggerConfig(config);
+  if (!audit_logger_or.ok()) {
+    return is_optional ? absl::OkStatus() : audit_logger_or.status();
+  }
+  return audit_logger_or;
+}
+
+absl::Status ParseAuditLoggingOptions(RbacPolicies& rbacs, const Json& json,
+                                      absl::string_view name) {
+  for (const auto& object : json.object()) {
+    if (object.first == "audit_condition") {
+      if (object.second.type() != Json::Type::kString) {
+        return absl::InvalidArgumentError(
+            "\"audit_condition\" is not a string.");
+      }
+      absl::string_view condition = object.second.string();
+      Rbac::AuditCondition deny_condition, allow_condition;
+      if (condition == "NONE") {
+        deny_condition = Rbac::AuditCondition::kNone;
+        allow_condition = Rbac::AuditCondition::kNone;
+      } else if (condition == "ON_ALLOW") {
+        deny_condition = Rbac::AuditCondition::kNone;
+        allow_condition = Rbac::AuditCondition::kOnAllow;
+      } else if (condition == "ON_DENY") {
+        deny_condition = Rbac::AuditCondition::kOnDeny;
+        allow_condition = Rbac::AuditCondition::kOnDeny;
+      } else if (condition == "ON_DENY_AND_ALLOW") {
+        deny_condition = Rbac::AuditCondition::kOnDeny;
+        allow_condition = Rbac::AuditCondition::kOnDenyAndAllow;
+      } else {
+        return absl::InvalidArgumentError(absl::StrFormat(
+            "Unsupported \"audit_condition\" value %s.", condition));
+      }
+      if (rbacs.deny_policy != absl::nullopt) {
+        rbacs.deny_policy->audit_condition = deny_condition;
+      }
+      rbacs.allow_policy.audit_condition = allow_condition;
+    } else if (object.first == "audit_loggers") {
+      if (object.second.type() != Json::Type::kArray) {
+        return absl::InvalidArgumentError("\"audit_loggers\" is not an array.");
+      }
+      for (size_t i = 0; i < object.second.array().size(); ++i) {
+        auto result = ParseAuditLogger(object.second.array().at(i), i);
+        if (!result.ok()) {
+          return result.status();
+        }
+        if (result.value() != nullptr) {
+          rbacs.allow_policy.audit_loggers.emplace_back(result.value());
+          if (rbacs.deny_policy != absl::nullopt) {
+            // Parse again since it returns unique_ptr, but no
+            // need to check the error this time.
+            rbacs.deny_policy->audit_loggers.emplace_back(
+                ParseAuditLogger(object.second.array().at(i), i).value());
+          }
+        }
+      }
+    }
+  }
+  return absl::OkStatus();
+}
+
 }  // namespace
 
 absl::StatusOr<RbacPolicies> GenerateRbacPolicies(
@@ -398,6 +498,15 @@ absl::StatusOr<RbacPolicies> GenerateRbacPolicies(
       }
       rbacs.allow_policy = std::move(*allow_policy_or);
       has_allow_rbac = true;
+    } else if (object.first == "audit_logging_options") {
+      if (object.second.type() != Json::Type::kObject) {
+        return absl::InvalidArgumentError(
+            "\"audit_logging_options\" is not an object.");
+      }
+      absl::Status status = ParseAuditLoggingOptions(rbacs, json, name);
+      if (!status.ok()) {
+        return status;
+      }
     } else {
       return absl::InvalidArgumentError(absl::StrFormat(
           "policy contains unknown field \"%s\".", object.first));

@@ -26,6 +26,8 @@
 
 #include "absl/types/optional.h"
 
+#include <grpc/grpc_audit_logging.h>
+
 #include "src/core/lib/matchers/matchers.h"
 
 namespace grpc_core {
@@ -36,6 +38,13 @@ struct Rbac {
   enum class Action {
     kAllow,
     kDeny,
+  };
+
+  enum class AuditCondition {
+    kNone,
+    kOnDeny,
+    kOnAllow,
+    kOnDenyAndAllow,
   };
 
   struct CidrRange {
@@ -171,6 +180,10 @@ struct Rbac {
 
   Action action;
   std::map<std::string, Policy> policies;
+
+  AuditCondition audit_condition;
+  std::vector<std::unique_ptr<experimental::AuditLoggerFactory::Config>>
+      audit_loggers;
 };
 
 }  // namespace grpc_core
