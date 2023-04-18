@@ -82,8 +82,7 @@ Pod::Spec.new do |s|
   s.subspec 'Interface' do |ss|
     ss.header_mappings_dir = 'include/grpcpp'
 
-    ss.source_files = 'include/grpc/grpc_audit_logging.h',
-                      'include/grpcpp/alarm.h',
+    ss.source_files = 'include/grpcpp/alarm.h',
                       'include/grpcpp/channel.h',
                       'include/grpcpp/client_context.h',
                       'include/grpcpp/completion_queue.h',
@@ -952,7 +951,6 @@ Pod::Spec.new do |s|
                       'src/core/lib/resource_quota/resource_quota.h',
                       'src/core/lib/resource_quota/thread_quota.h',
                       'src/core/lib/resource_quota/trace.h',
-                      'src/core/lib/security/audit_logging/audit_logging.cc',
                       'src/core/lib/security/audit_logging/audit_logging.h',
                       'src/core/lib/security/authorization/authorization_engine.h',
                       'src/core/lib/security/authorization/authorization_policy_provider.h',

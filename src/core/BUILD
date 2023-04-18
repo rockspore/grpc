@@ -3284,6 +3284,7 @@ grpc_cc_library(
     ],
     language = "c++",
     deps = [
+        "grpc_audit_logging",
         "grpc_authorization_base",
         "grpc_matchers",
         "resolved_address",

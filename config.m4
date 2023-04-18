@@ -701,6 +701,7 @@ if test "$PHP_GRPC" != "no"; then
     src/core/lib/resource_quota/resource_quota.cc \
     src/core/lib/resource_quota/thread_quota.cc \
     src/core/lib/resource_quota/trace.cc \
+    src/core/lib/security/audit_logging/audit_logging.cc \
     src/core/lib/security/authorization/authorization_policy_provider_vtable.cc \
     src/core/lib/security/authorization/evaluate_args.cc \
     src/core/lib/security/authorization/grpc_authorization_engine.cc \
@@ -1448,6 +1449,7 @@ if test "$PHP_GRPC" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/src/core/lib/promise)
   PHP_ADD_BUILD_DIR($ext_builddir/src/core/lib/resolver)
   PHP_ADD_BUILD_DIR($ext_builddir/src/core/lib/resource_quota)
+  PHP_ADD_BUILD_DIR($ext_builddir/src/core/lib/security/audit_logging)
   PHP_ADD_BUILD_DIR($ext_builddir/src/core/lib/security/authorization)
   PHP_ADD_BUILD_DIR($ext_builddir/src/core/lib/security/certificate_provider)
   PHP_ADD_BUILD_DIR($ext_builddir/src/core/lib/security/context)
