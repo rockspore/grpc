@@ -28,7 +28,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 
-#include <grpc/support/log.h>
+#include <grpc/grpc_audit_logging.h>
 
 #include "src/core/lib/channel/channel_args.h"
 #include "src/core/lib/json/json_args.h"
