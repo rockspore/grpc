@@ -14,6 +14,7 @@
 
 #include "src/core/ext/filters/rbac/rbac_service_config_parser.h"
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -25,7 +26,6 @@
 #include <grpc/grpc.h>
 #include <grpc/grpc_audit_logging.h>
 #include <grpc/slice.h>
-#include <grpc/support/json.h>
 
 #include "src/core/lib/gprpp/ref_counted_ptr.h"
 #include "src/core/lib/json/json_writer.h"
@@ -54,7 +54,7 @@ class TestAuditLoggerFactory : public AuditLoggerFactory {
  public:
   class Config : public AuditLoggerFactory::Config {
    public:
-    Config(const Json& json) : config_(JsonDump(json)) {}
+    explicit Config(const Json& json) : config_(JsonDump(json)) {}
     absl::string_view name() const override { return "test_logger"; }
     std::string ToString() const override { return config_; }
 
@@ -62,7 +62,8 @@ class TestAuditLoggerFactory : public AuditLoggerFactory {
     std::string config_;
   };
 
-  TestAuditLoggerFactory(std::map<absl::string_view, std::string>* configs)
+  explicit TestAuditLoggerFactory(
+      std::map<absl::string_view, std::string>* configs)
       : configs_(configs) {}
   absl::string_view name() const override { return "test_logger"; }
   absl::StatusOr<std::unique_ptr<AuditLoggerFactory::Config>>
@@ -86,11 +87,11 @@ class TestAuditLoggerFactory : public AuditLoggerFactory {
 
 class RbacServiceConfigParsingTest : public ::testing::Test {
  protected:
-  void SetUp() {
+  void SetUp() override {
     RegisterAuditLoggerFactory(
         std::make_unique<TestAuditLoggerFactory>(&logger_configs_));
   }
-  void TearDown() { AuditLoggerRegistry::TestOnlyResetRegistry(); }
+  void TearDown() override { AuditLoggerRegistry::TestOnlyResetRegistry(); }
   std::map<absl::string_view, std::string> logger_configs_;
 };
 

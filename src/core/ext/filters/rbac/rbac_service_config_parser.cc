@@ -25,9 +25,12 @@
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 
+#include <grpc/grpc_audit_logging.h>
+#include <grpc/support/json.h>
 #include <grpc/support/log.h>
 
 #include "src/core/lib/channel/channel_args.h"
