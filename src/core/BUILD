@@ -1066,7 +1066,6 @@ grpc_cc_library(
         "absl/container:flat_hash_set",
         "absl/status",
         "absl/strings",
-        "absl/synchronization",
         "absl/types:optional",
     ],
     deps = [
@@ -1921,7 +1920,6 @@ grpc_cc_library(
         "absl/status",
         "absl/status:statusor",
         "absl/strings",
-        "absl/synchronization",
         "absl/types:optional",
     ],
     deps = [
@@ -4068,6 +4066,7 @@ grpc_cc_library(
         "envoy_type_upb",
         "error",
         "google_rpc_status_upb",
+        "grpc_audit_logging",
         "grpc_fake_credentials",
         "grpc_fault_injection_filter",
         "grpc_lb_xds_channel_args",
