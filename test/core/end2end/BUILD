@@ -479,6 +479,7 @@ grpc_cc_test(
     name = "h2_ssl_cert_test",
     srcs = [
         "end2end_tests.h",
+        "engine_passthrough.cc",
         "h2_ssl_cert_test.cc",
     ],
     external_deps = [
@@ -490,6 +491,7 @@ grpc_cc_test(
         "absl/types:variant",
         "gtest",
         "libcrypto",
+        "libssl",
     ],
     language = "C++",
     deps = [
