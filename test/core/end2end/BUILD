@@ -491,7 +491,6 @@ grpc_cc_test(
         "absl/types:variant",
         "gtest",
         "libcrypto",
-        "libssl",
     ],
     language = "C++",
     deps = [

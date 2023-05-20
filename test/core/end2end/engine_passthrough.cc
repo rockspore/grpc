@@ -21,10 +21,7 @@
 // This sample engine expects KeyId to be actual PEM encoded
 // key itself and just calls standard openSSL functions.
 
-#include <openssl/bio.h>
-#include <openssl/engine.h>
-#include <openssl/pem.h>
-
+#include <openssl/crypto.h>
 #ifndef OPENSSL_IS_BORINGSSL
 
 #include <stdio.h>
