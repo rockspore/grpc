@@ -53,7 +53,8 @@ class TlsCertificateSelectorTest : public ::testing::Test {
         private_key_(GetFileContents(
             absl::StrCat(kTestCredsRelativePath, "server1.key"))) {}
 
-  static std::vector<std::string> ConvertCertChainToDer(absl::string_view pem_cert_chain) {
+  static std::vector<std::string> ConvertCertChainToDer(
+      absl::string_view pem_cert_chain) {
     std::vector<std::string> cert_chain;
     BIO* bio = BIO_new_mem_buf(pem_cert_chain.data(), pem_cert_chain.size());
     uint8_t* cert_data = nullptr;
