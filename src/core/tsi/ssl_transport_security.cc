@@ -3251,14 +3251,12 @@ tsi_result tsi_create_ssl_server_handshaker_factory_with_options(
       [&](std::vector<tsi_ssl_pem_key_cert_pair> key_cert_pairs) {
         pem_key_cert_pairs = std::move(key_cert_pairs);
       },
-      [&](std::shared_ptr<grpc_core::CertificateSelector>
-              selector) {
+      [&](std::shared_ptr<grpc_core::CertificateSelector> selector) {
         certificate_selector = std::move(selector);
       });
   if (factory == nullptr) return TSI_INVALID_ARGUMENT;
   *factory = nullptr;
-  if (pem_key_cert_pairs.empty() &&
-      certificate_selector == nullptr) {
+  if (pem_key_cert_pairs.empty() && certificate_selector == nullptr) {
     return TSI_INVALID_ARGUMENT;
   }
 
@@ -3266,9 +3264,8 @@ tsi_result tsi_create_ssl_server_handshaker_factory_with_options(
   tsi_ssl_handshaker_factory_init(&impl->base);
   impl->base.vtable = &server_handshaker_factory_vtable;
 
-  impl->ssl_context_count = certificate_selector == nullptr
-                                ? pem_key_cert_pairs.size()
-                                : 1;
+  impl->ssl_context_count =
+      certificate_selector == nullptr ? pem_key_cert_pairs.size() : 1;
   impl->ssl_contexts = static_cast<SSL_CTX**>(
       gpr_zalloc(impl->ssl_context_count * sizeof(SSL_CTX*)));
   impl->ssl_context_x509_subject_names = static_cast<tsi_peer*>(
@@ -3319,9 +3316,9 @@ tsi_result tsi_create_ssl_server_handshaker_factory_with_options(
       if (result != TSI_OK) return result;
 
       if (certificate_selector == nullptr) {
-        result = populate_ssl_context(impl->ssl_contexts[i],
-                                      &pem_key_cert_pairs[i],
-                                      options->cipher_suites);
+        result =
+            populate_ssl_context(impl->ssl_contexts[i], &pem_key_cert_pairs[i],
+                                 options->cipher_suites);
       } else {
 #if defined(OPENSSL_IS_BORINGSSL)
         // Only populates the cipher suites.
@@ -3340,11 +3337,9 @@ tsi_result tsi_create_ssl_server_handshaker_factory_with_options(
       if (result != TSI_OK) break;
 
 #if defined(OPENSSL_IS_BORINGSSL)
-      if (impl->base.key_signer == nullptr &&
-          certificate_selector == nullptr) {
+      if (impl->base.key_signer == nullptr && certificate_selector == nullptr) {
         grpc_core::Match(
-            pem_key_cert_pairs[i].private_key,
-            [](const std::string&) {},
+            pem_key_cert_pairs[i].private_key, [](const std::string&) {},
             [&](const std::shared_ptr<grpc_core::PrivateKeySigner>&
                     key_signer) { impl->base.key_signer = key_signer; });
       }
