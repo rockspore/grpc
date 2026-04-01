@@ -611,23 +611,24 @@ ssl_select_cert_result_t SelectCertificateCallback(
   // absl thread safety analysis because the use of MatchMutable.
   grpc_core::Match(
       result,
-      [&](const absl::StatusOr<grpc_core::CertificateSelector::SelectCertResult>&
-              select_cert_result) ABSL_NO_THREAD_SAFETY_ANALYSIS {
-        if (!select_cert_result.ok()) {
-          LOG(INFO) << "Sync select cert failed: "
-                    << select_cert_result.status();
-          handshaker->MaybeSetError(select_cert_result.status().ToString());
-          ssl_select_cert_result = ssl_select_cert_error;
-          return;
-        }
-        absl::Status status = ProcessSelectCertResult(
-            handshaker, *select_cert_result);
-        if (!status.ok()) {
-          LOG(INFO) << "Sync select cert failed: " << status;
-          handshaker->MaybeSetError(status.ToString());
-          ssl_select_cert_result = ssl_select_cert_error;
-        }
-      },
+      [&](const absl::StatusOr<
+          grpc_core::CertificateSelector::SelectCertResult>& select_cert_result)
+          ABSL_NO_THREAD_SAFETY_ANALYSIS {
+            if (!select_cert_result.ok()) {
+              LOG(INFO) << "Sync select cert failed: "
+                        << select_cert_result.status();
+              handshaker->MaybeSetError(select_cert_result.status().ToString());
+              ssl_select_cert_result = ssl_select_cert_error;
+              return;
+            }
+            absl::Status status =
+                ProcessSelectCertResult(handshaker, *select_cert_result);
+            if (!status.ok()) {
+              LOG(INFO) << "Sync select cert failed: " << status;
+              handshaker->MaybeSetError(status.ToString());
+              ssl_select_cert_result = ssl_select_cert_error;
+            }
+          },
       [&](std::shared_ptr<
           grpc_core::CertificateSelector::AsyncCertSelectionHandle>
               async_handle) ABSL_NO_THREAD_SAFETY_ANALYSIS {
