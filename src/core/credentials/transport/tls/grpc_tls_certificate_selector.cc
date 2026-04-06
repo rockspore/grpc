@@ -35,8 +35,8 @@
 namespace grpc_core {
 namespace {
 
-absl::StatusOr<std::vector<bssl::UniquePtr<CRYPTO_BUFFER>>> CreateRawCertChainFromDer(
-    const std::vector<std::string>& cert_chain) {
+absl::StatusOr<std::vector<bssl::UniquePtr<CRYPTO_BUFFER>>>
+CreateRawCertChainFromDer(const std::vector<std::string>& cert_chain) {
   std::vector<bssl::UniquePtr<CRYPTO_BUFFER>> raw_cert_chain;
   raw_cert_chain.reserve(cert_chain.size());
   for (absl::string_view cert : cert_chain) {
@@ -51,8 +51,8 @@ absl::StatusOr<std::vector<bssl::UniquePtr<CRYPTO_BUFFER>>> CreateRawCertChainFr
   return raw_cert_chain;
 }
 
-absl::StatusOr<std::vector<bssl::UniquePtr<CRYPTO_BUFFER>>> CreateRawCertChainFromPem(
-    absl::string_view cert_chain) {
+absl::StatusOr<std::vector<bssl::UniquePtr<CRYPTO_BUFFER>>>
+CreateRawCertChainFromPem(absl::string_view cert_chain) {
   std::vector<bssl::UniquePtr<CRYPTO_BUFFER>> raw_cert_chain;
   bssl::UniquePtr<BIO> bio(
       BIO_new_mem_buf(cert_chain.data(), cert_chain.size()));
