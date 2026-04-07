@@ -32,7 +32,8 @@ namespace grpc_core {
 namespace testing {
 namespace {
 
-constexpr absl::string_view kTestCredsRelativePath = "test/core/tsi/test_creds/crl_data/";
+constexpr absl::string_view kTestCredsRelativePath =
+    "test/core/tsi/test_creds/crl_data/";
 constexpr absl::string_view kServerCertFile = "valid.pem";
 constexpr absl::string_view kServerKeyFile = "valid.key";
 constexpr absl::string_view kInvalidPemBlock =
