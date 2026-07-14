@@ -82,7 +82,8 @@ void AsyncTestCertificateSelector::Cancel(
     std::shared_ptr<AsyncCertificateSelectionHandle> handle) {
   grpc_core::ExecCtx exec_ctx;
   auto event_engine = grpc_event_engine::experimental::GetDefaultEventEngine();
-  auto* internal_handle = DownCast<AsyncCertificateSelectionHandleInternal*>(handle.get());
+  auto* internal_handle =
+      DownCast<AsyncCertificateSelectionHandleInternal*>(handle.get());
   if (event_engine->Cancel(internal_handle->task_handle)) {
     // Only flip this if the event engine cancellation was successful.
     was_cancelled_.store(true);
